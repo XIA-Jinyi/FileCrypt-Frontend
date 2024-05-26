@@ -36,7 +36,28 @@
 export default {
   name: 'CryptSettings',
   mounted() {
-
+    fetch('/api/status', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw '内部异常';
+        }
+      })
+      .then((data) => {
+        this.pathPrefix = data.pathPrefix;
+        this.password = data.password;
+        this.isLoaded = data.isLoaded;
+      })
+      .catch((error) => {
+        alert(`错误：${error}`);
+        console.error('Error:', error);
+      });
   },
   data() {
     return {
@@ -50,14 +71,49 @@ export default {
   methods: {
     async load() {
       this.isLoading = true;
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      this.isLoaded = true;
+      fetch('/api/load', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pathPrefix: this.pathPrefix,
+          password: this.password
+        })
+      })
+        .then((response) => {
+          if (response.ok) {
+            this.isLoaded = true;
+          } else {
+            throw '加载失败';
+          }
+        })
+        .catch((error) => {
+          alert(`错误：${error}`);
+          console.error('Error:', error);
+        });
       this.isLoading = false;
     },
+
     async unload() {
       this.isUnloading = true;
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      this.isLoaded = false;
+      fetch('/api/unload', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+        .then((response) => {
+          if (response.ok) {
+            this.isLoaded =  false;
+          } else {
+            throw '卸载失败';
+          }
+        })
+        .catch((error) => {
+          alert(`错误：${error}`);
+          console.error('Error:', error);
+        });
       this.isUnloading = false;
     }
   }

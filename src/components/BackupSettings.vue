@@ -13,7 +13,7 @@
   <div class="mt-2">
     <div class="small text-secondary">
       当前备份服务器：
-      <a :href="server">{{ server }}</a>
+      <a :href="server" target="_blank">{{ server }}</a>
     </div>
   </div>
 </template>
@@ -22,20 +22,60 @@
 export default {
   name: 'BackupSettings',
   mounted() {
-
+    fetch('/api/server', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw 'URL 错误';
+        }
+      })
+      .then((data) => {
+        this.server = data.server;
+      })
+      .catch((error) => {
+        alert(`错误：${error}`);
+        console.error('Error:', error);
+      });
   },
   data() {
     return {
       input: '',
-      server: 'https://www.baidu.com/',
+      server: '',
       isSetting: false,
     }
   },
   methods: {
     async set() {
       this.isSetting = true;
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      this.server = this.input;
+      fetch('/api/server', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          server: this.input
+        })
+      })
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw '内部异常';
+          }
+        })
+        .then((data) => {
+          this.server = data.server;
+        })
+        .catch((error) => {
+          alert(`错误：${error}`);
+          console.error('Error:', error);
+        });
       this.input = '';
       this.isSetting = false;
     }
