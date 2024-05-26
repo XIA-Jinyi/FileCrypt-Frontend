@@ -18,14 +18,14 @@
 
       <div class="col col-12 col-md-5 mt-4">
         <h3>后台日志</h3>
-        <div class="mt-3 text-secondary">
-          <pre>{{ this.log }}</pre>
+        <div class="card mt-3 text-secondary" style="min-height: 200px; max-height: 500px; overflow-y: auto;">
+          <pre class="card-body">{{ this.log }}</pre>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="container mt-4 mb-3 text-muted small">
+  <div class="container mt-2 mb-3 text-muted small d-flex justify-content-end">
     作者：夏锦熠、何冠立、黄凯博、张原赫、张宇轩
   </div>
 </template>
@@ -33,15 +33,23 @@
 <script>
 import CryptSettings from "./components/CryptSettings.vue"
 import BackupSettings from "./components/BackupSettings.vue"
+import io from 'socket.io-client';
 
 export default {
   name: 'FileCrypt',
   mounted() {
-    document.title = "文件系统加密驱动"
+    document.title = "文件系统加密驱动";
+    this.socket = io(window.location.origin);
+    this.socket.on('log', (msg) => {
+      let now = new Date();
+      let localTime = now.toLocaleString();
+      this.log = `[${localTime}] ${msg}\n${this.log}`;
+    });
   },
   data() {
     return {
-      log: "Hello!\nBUPT!"
+      log: "",
+      socket: null
     }
   },
   components: {
