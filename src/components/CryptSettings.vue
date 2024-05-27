@@ -71,7 +71,7 @@ export default {
   methods: {
     async load() {
       this.isLoading = true;
-      fetch('/api/load', {
+      await fetch('/api/load', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -97,7 +97,7 @@ export default {
 
     async unload() {
       this.isUnloading = true;
-      fetch('/api/unload', {
+      await fetch('/api/unload', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

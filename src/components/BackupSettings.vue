@@ -53,7 +53,7 @@ export default {
   methods: {
     async set() {
       this.isSetting = true;
-      fetch('/api/server', {
+      await fetch('/api/server', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
