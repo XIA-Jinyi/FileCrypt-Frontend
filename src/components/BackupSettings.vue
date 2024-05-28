@@ -66,7 +66,7 @@ export default {
           if (response.ok) {
             return response.json();
           } else {
-            throw '内部异常';
+            throw 'URL 错误或服务器不可用';
           }
         })
         .then((data) => {
