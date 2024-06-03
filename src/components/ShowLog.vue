@@ -16,7 +16,6 @@ export default {
     }
   },
   mounted() {
-    document.title = "文件系统加密驱动";
     this.socket = io(window.location.origin);
     this.socket.on('log', (msg) => {
       let now = new Date();

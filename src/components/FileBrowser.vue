@@ -1,10 +1,10 @@
 <template>
   <nav>
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><i class="bi bi-hdd-network"></i></li>
+      <li class="breadcrumb-item"><a href="#" @click="gotoDir(-1)"><i class="bi bi-hdd-network"></i></a></li>
       <li class="breadcrumb-item"
         v-for="(item, index) in dir"
-        :class="{ 'active': index+1 === dir.length }"
+        :class="{ 'active': index+1 === dir.length && !isLoading }" 
         :key="index">
         <a v-if="index+1 !== dir.length" href="#" @click="gotoDir(index)">{{ item }}</a>
         <span v-else>{{ item }}</span>
@@ -13,14 +13,15 @@
   </nav>
 
   <div class="list-group">
-    <button type="button" class="list-group-item list-group-item-action" @click="dir.pop();">
-      <i class="bi bi-arrow-up-circle"></i> ..
+    <button type="button" class="list-group-item list-group-item-action" :class="{ 'disabled': isLoading }" @click="dir.pop(); list();">
+      <span class="bi bi-folder-fill text-primary"></span> ..
     </button>
     <button v-for="(item, index) in files"
       type="button" class="list-group-item list-group-item-action" :key="index"
-      @click="item.isFile ? getFile(item.name) : enterDir(item.name)">
-      <i v-if="item.isFile" class="bi bi-file-earmark-arrow-down"></i>
-      <i v-else class="bi bi-folder-symlink"></i>
+      @click="item.isFile ? getFile(item.name) : enterDir(item.name)"
+      :class="{ 'disabled': isLoading }">
+      <span v-if="item.isFile" class="bi bi-file-earmark-text text-primary"></span>
+      <span v-else class="bi bi-folder-fill text-primary"></span>
       {{ item.name }}
     </button>
   </div>
@@ -31,7 +32,7 @@ export default {
   name: 'FileBrowser',
   data() {
     return {
-      dir: ['Home', 'Library', 'Backup', 'Data',],
+      dir: [],
       files: [
         {
           name: 'folder1',
@@ -57,18 +58,78 @@ export default {
           name: 'file4.mkv',
           isFile: true
         }
-      ]
+      ],
+      isLoading: false,
+      server: '',
     }
   },
+  mounted() {
+    this.init()
+  },
   methods: {
+    list() {
+      this.isLoading = true;
+      fetch('/api/list', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          path: this.dir.join('/'),
+        })
+      })
+        .then((response) => {
+            return response.json();
+        })
+        .then((data) => {
+          this.files = data;
+        })
+        .catch((error) => {
+          alert(`错误：${error}`);
+          console.error('Error:', error);
+        });
+      this.isLoading = false;
+    },
+    init() {
+      fetch('/api/server', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw 'URL 错误';
+          }
+        })
+        .then((data) => {
+          this.server = data.server;
+        })
+        .catch((error) => {
+          alert(`错误：${error}`);
+          console.error('Error:', error);
+        });
+      this.list()
+    },
     async gotoDir(index) {
+      if (index < 0) {
+        this.dir = [];
+      }
       this.dir = this.dir.slice(0, index + 1);
+      this.list();
     },
     async enterDir(name) {
       this.dir.push(name);
+      this.list();
     },
     async getFile(name) {
-      alert(`Download ${this.dir.concat(name).join('/')}`);
+      const link = document.createElement('a');
+      link.href = `${this.server}/get/${this.dir.concat(name).join('/')}`
+      link.download = name;
+      link.target = "_blank";
+      link.click();
     }
   }
 }

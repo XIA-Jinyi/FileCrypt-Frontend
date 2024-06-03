@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex mt-3">
+  <div class="d-flex">
     <div class="input-group">
       <span class="input-group-text"><i class="bi bi-hdd-network"></i></span>
       <input class="form-control flex-grow-1" placeholder="备份服务器 HTTP 地址" v-model="input">
@@ -78,6 +78,7 @@ export default {
         });
       this.input = '';
       this.isSetting = false;
+      window.location.reload();
     }
   }
 }

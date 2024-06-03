@@ -1,7 +1,7 @@
 <template>
-  <div class="input-group mt-3">
-    <span class="input-group-text"><i class="bi bi-folder2-open"></i></span>
-    <input class="form-control flex-grow-1" placeholder="请输入加密路径" v-model="pathPrefix"
+  <div class="input-group">
+    <span class="input-group-text"><i class="bi bi-window"></i></span>
+    <input class="form-control flex-grow-1" placeholder="请输入加密进程路径" v-model="pathPrefix"
       :disabled="isLoaded || isLoading">
   </div>
   <div class="input-group mt-2">
@@ -13,7 +13,10 @@
       <div v-if="isLoaded" class="small text-primary">
         <i class="bi bi-check-circle"></i> 驱动已加载
       </div>
-      <div v-if="!isLoaded" class="small text-secondary">
+      <div v-else-if="isLoading" class="small text-secondary">
+        <span class="spinner-grow spinner-grow-sm"></span>
+      </div>
+      <div v-else class="small text-secondary">
         <i class="bi bi-exclamation-circle"></i> 驱动未加载
       </div>
     </div>
@@ -70,6 +73,10 @@ export default {
   },
   methods: {
     async load() {
+      if (this.pathPrefix === '' || this.password === '') {
+        alert('请填写加密进程路径和密码！');
+        return;
+      }
       this.isLoading = true;
       await fetch('/api/load', {
         method: 'PUT',
